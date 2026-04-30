@@ -12,6 +12,8 @@ export const MyPosts = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       })
       .then((res) => {
+        console.log(res.data)
+
         setPosts(res.data.results || res.data);
       });
   }, []);

@@ -8,6 +8,8 @@ import { Profile } from "./pages/Profile";
 import { CreatePost } from "./pages/CreatePost";
 import { MyPosts } from "./pages/MyPosts";
 import { EditPost } from "./pages/EditPost";
+import { PrivateRoute } from "./components/PrivateRoute";
+import { NotFound } from "./pages/NotFound";
 
 export const App = () => {
   return (
@@ -16,12 +18,41 @@ export const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/posts/create"
+          element={
+            <PrivateRoute>
+              <CreatePost />
+            </PrivateRoute>
+          }
+        />
         <Route path="/posts/:slug" element={<Post />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/posts/create" element={<CreatePost />} />
-        <Route path="/my-posts" element={<MyPosts />} />
-        <Route path="/posts/:slug/edit" element={<EditPost />} />
+        <Route
+          path="/posts/:slug/edit"
+          element={
+            <PrivateRoute>
+              <EditPost />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-posts"
+          element={
+            <PrivateRoute>
+              <MyPosts />
+            </PrivateRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

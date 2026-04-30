@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
+import { getApiErrorMessage, validateMinLength } from "../utils/formValidation";
 import "./Post.css";
 
 export const Post = () => {
@@ -8,6 +9,8 @@ export const Post = () => {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
+  const [commentError, setCommentError] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
   const isAuth = !!localStorage.getItem("access");
   const navigate = useNavigate();
   const token = localStorage.getItem("access");
@@ -15,16 +18,22 @@ export const Post = () => {
   useEffect(() => {
     api.get(`/posts/${slug}/`).then((res) => {
       setPost(res.data);
-
       api
         .get(`/comments/?post=${res.data.id}`)
-
         .then((r) => setComments(r.data.results || r.data));
     });
-  }, [slug]);
+
+    if (token) {
+      api
+        .get("/auth/profile/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setCurrentUser(res.data));
+    }
+  }, [slug, token]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Видалити пост?")) return;
+    if (!globalThis.confirm("Видалити пост?")) return;
     await api.delete(`/posts/${slug}/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -33,28 +42,35 @@ export const Post = () => {
 
   const handleComment = async (e) => {
     e.preventDefault();
+
+    const textError = validateMinLength(text, "Коментар", 2);
+    if (textError) {
+      setCommentError(textError);
+      return;
+    }
+
     try {
       await api.post(
         "/comments/",
+        { post: post.id, content: text },
         {
-          post: post.id,
-          content: text,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access")}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
       setText("");
+      setCommentError("");
       const res = await api.get(`/comments/?post=${post.id}`);
       setComments(res.data.results || res.data);
     } catch (err) {
-      console.error(err.response?.data);
+      setCommentError(
+        getApiErrorMessage(err.response?.data, "Не вдалося надіслати коментар"),
+      );
     }
   };
 
   if (!post) return <p>Завантаження...</p>;
+
+  const isAuthor = currentUser?.id === post.author_info?.id;
 
   return (
     <div className="post-page">
@@ -64,7 +80,7 @@ export const Post = () => {
       </div>
       <p className="post-content">{post.content}</p>
 
-      {token && (
+      {isAuthor && (
         <div className="post-actions">
           <Link to={`/posts/${slug}/edit`}>Редагувати</Link>
           <button onClick={handleDelete}>Видалити</button>
@@ -86,8 +102,13 @@ export const Post = () => {
               <textarea
                 placeholder="Ваш коментар..."
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  setCommentError("");
+                }}
+                aria-invalid={Boolean(commentError)}
               />
+              {commentError && <p className="form-error">{commentError}</p>}
               <button type="submit">Надіслати</button>
             </form>
           </div>

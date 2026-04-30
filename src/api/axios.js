@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost/api/v1",
+  baseURL: "https://newsapi.duckdns.org/api/v1",
 });
 
 api.interceptors.response.use(
@@ -12,7 +12,7 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const res = await axios.post(
-          "http://localhost/api/v1/auth/token/refresh",
+          "https://newsapi.duckdns.org/api/v1/auth/token/refresh",
           {
             refresh: localStorage.getItem("refresh"),
           },

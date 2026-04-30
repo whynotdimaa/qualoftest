@@ -13,6 +13,7 @@ export const Profile = () => {
         },
       })
       .then((res) => {
+        console.log(res.data);
         setProfile(res.data);
       });
   }, []);

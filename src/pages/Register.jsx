@@ -1,5 +1,13 @@
 import { useState } from "react";
 import api from "../api/axios";
+import { Link } from "react-router-dom";
+import {
+  getApiErrorMessage,
+  validateEmail,
+  validateMatch,
+  validateMinLength,
+  validateRequired,
+} from "../utils/formValidation";
 import "./Form.css";
 
 export const Register = () => {
@@ -7,10 +15,39 @@ export const Register = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [username, setUsername] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const newErrors = {};
+
+    const usernameError = validateRequired(username, "Username");
+    const emailError = validateEmail(email);
+    const passwordError = validateMinLength(password, "Пароль", 8);
+    const confirmError = validateMatch(
+      passwordConfirm,
+      password,
+      "Підтвердження пароля",
+    );
+
+    if (usernameError) newErrors.username = usernameError;
+    if (emailError) newErrors.email = emailError;
+    if (passwordError) newErrors.password = passwordError;
+    if (confirmError) newErrors.passwordConfirm = confirmError;
+
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+
     try {
       await api.post("/auth/register/", {
         email,
@@ -18,43 +55,89 @@ export const Register = () => {
         password_confirm: passwordConfirm,
         username,
       });
-      window.location.href = "/login";
+      globalThis.location.href = "/login";
     } catch (err) {
-      setError(JSON.stringify(err.response?.data));
+      setErrors({
+        general: getApiErrorMessage(
+          err.response?.data,
+          "Не вдалося створити акаунт",
+        ),
+      });
     }
   };
 
   return (
     <div className="form-page">
       <h1>Реєстрація</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {errors.general && <p className="form-error">{errors.general}</p>}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Username"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            setErrors((currentErrors) => ({
+              ...currentErrors,
+              username: "",
+              general: "",
+            }));
+          }}
+          aria-invalid={Boolean(errors.username)}
         />
+        {errors.username && <p className="form-error">{errors.username}</p>}
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setErrors((currentErrors) => ({
+              ...currentErrors,
+              email: "",
+              general: "",
+            }));
+          }}
+          aria-invalid={Boolean(errors.email)}
         />
+        {errors.email && <p className="form-error">{errors.email}</p>}
         <input
           type="password"
           placeholder="Пароль"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setErrors((currentErrors) => ({
+              ...currentErrors,
+              password: "",
+              general: "",
+            }));
+          }}
+          aria-invalid={Boolean(errors.password)}
         />
+        {errors.password && <p className="form-error">{errors.password}</p>}
         <input
           type="password"
           placeholder="Підтвердіть пароль"
           value={passwordConfirm}
-          onChange={(e) => setPasswordConfirm(e.target.value)}
+          onChange={(e) => {
+            setPasswordConfirm(e.target.value);
+            setErrors((currentErrors) => ({
+              ...currentErrors,
+              passwordConfirm: "",
+              general: "",
+            }));
+          }}
+          aria-invalid={Boolean(errors.passwordConfirm)}
         />
+        {errors.passwordConfirm && (
+          <p className="form-error">{errors.passwordConfirm}</p>
+        )}
         <button type="submit">Зареєструватись</button>
       </form>
+      <p className="form-link">
+        Вже маєш акаунт? <Link to="/login">Увійди</Link>
+      </p>
     </div>
   );
 };
