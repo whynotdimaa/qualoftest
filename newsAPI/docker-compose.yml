@@ -68,6 +68,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     volumes:
       - static_volume:/staticfiles:ro
       - media_volume:/app/media
