@@ -1,0 +1,88 @@
+.post-page {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.post-page h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #1a1a2e;
+}
+
+.post-page .post-meta {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 24px;
+}
+
+.post-page .post-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.post-actions a {
+  background: #0066cc;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.post-actions a:hover {
+  background: #0052a3;
+  text-decoration: none;
+}
+
+.post-actions button {
+  background: #e74c3c;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+.post-actions button:hover {
+  background: #c0392b;
+}
+
+.comments-section h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #1a1a2e;
+}
+
+.comment {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.comment strong {
+  font-size: 14px;
+  color: #0066cc;
+}
+
+.comment p {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #444;
+}
+
+.comment-form {
+  margin-top: 24px;
+}
+
+.comment-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
