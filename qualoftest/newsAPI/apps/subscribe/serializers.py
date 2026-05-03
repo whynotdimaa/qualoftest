@@ -5,8 +5,16 @@ from .models import SubscriptionPlan, Subscription, PinnedPost, SubscriptionHist
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlan
-        fields = ['id', 'name', 'price', 'duration_days',
-                  'is_active', 'created_at']
+        fields = [
+            'id',
+            'name',
+            'price',
+            'duration_days',
+            'stripe_price_id',
+            'features',
+            'is_active',
+            'created_at',
+        ]
         read_only_fields = ['id', 'created_at']
 
     def to_representation(self, instance):
@@ -57,7 +65,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
 
         #Провіряєм чи є активна підписка
-        if hasattr(user, 'subscription') and user.subscription.is_active():
+        if hasattr(user, 'subscription') and user.subscription.is_active:
             raise serializers.ValidationError({'non_field_errors' : ['User has already active subscription']})
         return attrs
 
@@ -72,6 +80,14 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
 
 class PinnedPostSerializer(serializers.ModelSerializer):
     post_info = serializers.SerializerMethodField()
+
+    @staticmethod
+    def _safe_post_image_url(post):
+        try:
+            return post.image.url if post.image else None
+        except Exception:
+            return None
+
     class Meta:
         model = PinnedPost
         fields =['id', 'post', 'post_info', 'pinned_at']
@@ -83,7 +99,7 @@ class PinnedPostSerializer(serializers.ModelSerializer):
             'title' : obj.post.title,
             'slug' : obj.post.slug,
             'content' : obj.post.content,
-            'image' : obj.post.image if obj.post.image else None,
+            'image': self._safe_post_image_url(obj.post),
             'views' : obj.post.views_count,
             'created_at' : obj.post.created_at,
         }
@@ -106,7 +122,7 @@ class PinnedPostSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
 
         # Провіряєм чи є активна підписка
-        if not hasattr(user, 'subscription') or not user.subscription.is_active():
+        if not hasattr(user, 'subscription') or not user.subscription.is_active:
             raise serializers.ValidationError({'non_field_errors' : ['Active subscription is required to pin']})
 
         return attrs
@@ -133,7 +149,7 @@ class UserSubscriptionStatusSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         '''Формує відповідь з інформацією про підписку'''
         user = instance
-        has_subscription = hasattr(user, 'subcription')
+        has_subscription = hasattr(user, 'subscription')
         subscription = user.subscription if has_subscription else None
         is_active = subscription.is_active if subscription else False
         pinned_post = getattr(user, 'pinned_post', None) if is_active else None

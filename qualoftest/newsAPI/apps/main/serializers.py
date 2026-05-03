@@ -3,6 +3,18 @@ from django.utils.text import slugify
 from .models import Category, Post
 
 
+def _safe_media_url(fieldfile, request):
+    try:
+        if fieldfile:
+            url = fieldfile.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+    except Exception:
+        pass
+    return None
+
+
 class CategorySerializer(serializers.ModelSerializer):
     posts_count = serializers.SerializerMethodField()
 
@@ -24,14 +36,20 @@ class PostListSerializer(serializers.ModelSerializer):
     comments_count = serializers.ReadOnlyField()
     is_pinned = serializers.ReadOnlyField()
     pinned_info = serializers.SerializerMethodField()
-
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'slug', 'content', 'image' ,
-                  'category' ,'author' , 'status', 'created_at',
-                  'updated_at', 'views_count','comments_count','is_pinned', 'pinned_info']
-        read_only_fields = ('slug', 'author', 'views_count', )
+        fields = [
+            'id', 'title', 'slug', 'content', 'image',
+            'category', 'author', 'status', 'created_at',
+            'updated_at', 'views_count', 'comments_count', 'is_pinned', 'pinned_info',
+        ]
+        read_only_fields = ('slug', 'author', 'views_count',)
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        return _safe_media_url(obj.image, request)
 
     def get_pinned_info(self, obj):
         return obj.get_pinned_info()
@@ -49,21 +67,30 @@ class PostDetailSerializer(serializers.ModelSerializer):
     is_pinned = serializers.ReadOnlyField()
     pinned_info = serializers.SerializerMethodField()
     can_pin = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'slug', 'content', 'image',
-                  'category', 'author', 'status', 'created_at',
-                  'updated_at', 'views_count', 'comments_count','author_info', 'category_info', 'is_pinned', 'pinned_info', 'can_pin']
+        fields = [
+            'id', 'title', 'slug', 'content', 'image',
+            'category', 'author', 'status', 'created_at',
+            'updated_at', 'views_count', 'comments_count', 'author_info',
+            'category_info', 'is_pinned', 'pinned_info', 'can_pin',
+        ]
         read_only_fields = ('slug', 'author', 'views_count')
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        return _safe_media_url(obj.image, request)
 
     def get_author_info(self, obj):
         author = obj.author
+        request = self.context.get('request')
         return {
             'id': author.id,
             'username': author.username,
             'full_name': author.full_name,
-            'avatar' : author.avatar if author.avatar else None
+            'avatar': _safe_media_url(author.avatar, request),
         }
     def get_category_info(self, obj):
         if obj.category:
@@ -84,9 +111,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
         return obj.can_be_pinned_by(request.user)
 
 class PostCreateSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(read_only=True)
+
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'category', 'status']
+        fields = ['title', 'slug', 'content', 'image', 'category', 'status']
 
     def create(self, validated_data):
         validated_data['slug'] = slugify(validated_data['title'])
@@ -95,5 +124,5 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if 'title' in validated_data:
-            validated_data['title'] = slugify(validated_data['title'])
+            validated_data['slug'] = slugify(validated_data['title'])
         return super().update(instance, validated_data)

@@ -111,7 +111,7 @@ def post_comments(request, post_id):
             'slug': post.slug,
         },
         'comments': serializer.data,
-        'comments_count': post.comment.filter(is_active = True).count(),
+        'comments_count': post.comments.filter(is_active=True).count(),
 
     })
 

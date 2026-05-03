@@ -81,7 +81,7 @@ class LoginView(generics.GenericAPIView):
         tags=['Користувачі']
     )
 )
-class ProfileView(generics.RetrieveAPIView):
+class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 

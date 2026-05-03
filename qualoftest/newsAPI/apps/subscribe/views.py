@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from datetime import timezone
+from django.utils import timezone
 from .models import Subscription, SubscriptionPlan, SubscriptionHistory, PinnedPost
 from .serializers import (SubscriptionPlanSerializer, SubscriptionSerializer,
                           SubscriptionCreateSerializer, PinnedPostSerializer,
@@ -276,35 +276,42 @@ def cancel_subscription(request):
 @permission_classes([permissions.AllowAny])
 def pinned_post_list(request):
     '''Повертає список всіх закріпленних постів'''
-    pinned_posts = (PinnedPost.objects.select_related
-            ('post', 'post__author', 'post__category', 'user__subscription'
+    qs = PinnedPost.objects.select_related(
+        'post', 'post__author', 'post__category', 'user', 'user__subscription'
     ).filter(
-        user__subscription__status = 'active',
-        user__subscription__end_date__gt = timezone.now(),
-        post__status ='published'
-    ).order_by('pinned_at'))
+        user__subscription__status='active',
+        user__subscription__end_date__gt=timezone.now(),
+        post__status='published',
+    ).order_by('pinned_at')
 
-    # Формуєм відповідь з інфою про пост
     posts_data = []
-    for pinned_posts in pinned_posts:
-        post = pinned_post.post
+    for pp in qs:
+        post = pp.post
+        try:
+            img = post.image.url if post.image else None
+        except Exception:
+            img = None
         posts_data.append({
-            'id' : post.id,
-            'title' : post.title,
-            'slug' : post.slug,
-            'content' : post.content[:200] + '...' if len(post.content) > 200 else post.content,
-            'image' : post.image.url if post.image else None,
-            'category' : post.category.name if post.category else None,
-            'author' : {
-               'id' : post.author.id,
-               'username' : post.author.username,
-               'full_name' : post.author.full_name,
-        },
-            'views_count' : post.views_count,
-            'comments_count' : post.comments_count,
-            'created_at' : post.created_at,
-            'pinned_at' : pinned_posts.pinned_at,
-            'is_pinned' : True,
+            'id': post.id,
+            'title': post.title,
+            'slug': post.slug,
+            'content': (
+                post.content[:200] + '...'
+                if len(post.content) > 200
+                else post.content
+            ),
+            'image': img,
+            'category': post.category.name if post.category else None,
+            'author': {
+                'id': post.author.id,
+                'username': post.author.username,
+                'full_name': post.author.full_name,
+            },
+            'views_count': post.views_count,
+            'comments_count': post.comments.filter(is_active=True).count(),
+            'created_at': post.created_at,
+            'pinned_at': pp.pinned_at,
+            'is_pinned': True,
         })
     return Response({
         'count' : len(posts_data),
