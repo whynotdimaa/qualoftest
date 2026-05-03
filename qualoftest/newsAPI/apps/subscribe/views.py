@@ -18,7 +18,8 @@ from .serializers import (SubscriptionPlanSerializer, SubscriptionSerializer,
 from apps.main.models import Post
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
-
+from django.conf import settings
+url = settings.FRONTEND_URL
 
 @extend_schema_view(
     get=extend_schema(

@@ -188,7 +188,7 @@ os.makedirs(BASE_DIR / 'logs' , exist_ok=True)
 STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY',default='')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY',default='')
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET',default='')
-
+FRONTEND_URL = "http://localhost:5173"  # або інший порт, на якому працює фронтенд
 # Email настройки
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='localhost')
