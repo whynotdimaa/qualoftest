@@ -62,3 +62,54 @@
   color: #999;
   margin-top: 4px;
 }
+
+.profile-avatar-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.profile-card-static {
+  margin-bottom: 24px;
+}
+
+.profile-form {
+  max-width: 600px;
+  margin: 0 auto 28px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.profile-form h2 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #1a1a2e;
+}
+
+.profile-flash {
+  max-width: 600px;
+  margin: 0 auto 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.profile-flash.ok {
+  background: #e6ffed;
+  color: #1a4922;
+}
+
+.profile-flash.err {
+  background: #ffebeb;
+  color: #851d1d;
+}
+
+.profile-page .profile-form textarea {
+  width: 100%;
+  resize: vertical;
+}

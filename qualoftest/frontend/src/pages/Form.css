@@ -15,7 +15,8 @@
 }
 
 .form-page input,
-.form-page textarea {
+.form-page textarea,
+.form-page select {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
@@ -26,7 +27,8 @@
 }
 
 .form-page input:focus,
-.form-page textarea:focus {
+.form-page textarea:focus,
+.form-page select:focus {
   outline: none;
   border-color: #0066cc;
 }
@@ -34,6 +36,33 @@
 .form-page input[aria-invalid="true"],
 .form-page textarea[aria-invalid="true"] {
   border-color: #e74c3c;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.form-hint {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.form-thumb-preview {
+  display: block;
+  max-height: 140px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.form-page input[type="file"] {
+  padding: 8px;
+  border: 1px dashed #ccc;
+  background: #fafafa;
 }
 
 .form-page button[type="submit"] {

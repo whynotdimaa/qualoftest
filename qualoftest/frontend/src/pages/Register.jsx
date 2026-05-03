@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../api/axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   getApiErrorMessage,
   validateEmail,
@@ -11,6 +11,7 @@ import {
 import "./Form.css";
 
 export const Register = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -49,13 +50,15 @@ export const Register = () => {
     setErrors({});
 
     try {
-      await api.post("/auth/register/", {
+      const { data } = await api.post("/auth/register/", {
         email,
         password,
         password_confirm: passwordConfirm,
         username,
       });
-      globalThis.location.href = "/login";
+      if (data.access) localStorage.setItem("access", data.access);
+      if (data.refresh) localStorage.setItem("refresh", data.refresh);
+      navigate("/");
     } catch (err) {
       setErrors({
         general: getApiErrorMessage(

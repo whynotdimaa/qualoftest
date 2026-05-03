@@ -1,12 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { logoutApi } from "../api/axios";
 import "./Header.css";
 
 export const Header = () => {
-  const isAuth = !!localStorage.getItem("access");
+  const location = useLocation();
+  const [isAuth, setIsAuth] = useState(() => !!localStorage.getItem("access"));
 
-  const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
+  useEffect(() => {
+    setIsAuth(!!localStorage.getItem("access"));
+  }, [location.pathname]);
+
+  const handleLogout = async () => {
+    await logoutApi();
     globalThis.location.href = "/login";
   };
 
@@ -16,8 +22,16 @@ export const Header = () => {
         <Link to="/" className="logo">
           NewsAPI
         </Link>
-        {isAuth && <Link to="/my-posts">Мої пости</Link>}
-        {isAuth && <Link to="/profile">Профіль</Link>}
+        <Link to="/categories">Категорії</Link>
+        {isAuth ? (
+          <>
+            <Link to="/subscribe">Підписка</Link>
+            <Link to="/payments">Платежі</Link>
+            <Link to="/my-comments">Мої коментарі</Link>
+            <Link to="/my-posts">Мої пости</Link>
+            <Link to="/profile">Профіль</Link>
+          </>
+        ) : null}
       </div>
       <div className="nav-right">
         {isAuth ? (
@@ -25,7 +39,7 @@ export const Header = () => {
             <Link to="/posts/create" className="btn-create">
               + Створити пост
             </Link>
-            <button className="btn-logout" onClick={handleLogout}>
+            <button type="button" className="btn-logout" onClick={handleLogout}>
               Вийти
             </button>
           </>

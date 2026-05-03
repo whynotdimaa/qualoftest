@@ -1,15 +1,31 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { mediaUrl } from "../utils/backendMeta";
 import { getApiErrorMessage, validateMinLength } from "../utils/formValidation";
-import "../pages/Form.css";
+import "./Form.css";
 
 export const EditPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [status, setStatus] = useState("published");
+  const [existingImageUrl, setExistingImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    api
+      .get("/posts/categories/")
+      .then((r) => {
+        const raw = Array.isArray(r.data) ? r.data : r.data.results;
+        setCategories(Array.isArray(raw) ? raw : []);
+      })
+      .catch(() => setCategories([]));
+  }, []);
 
   useEffect(() => {
     api
@@ -17,6 +33,17 @@ export const EditPost = () => {
       .then((res) => {
         setTitle(res.data.title);
         setContent(res.data.content);
+        const cid =
+          typeof res.data.category === "number"
+            ? res.data.category
+            : res.data.category?.id ??
+              res.data.category_info?.id ??
+              "";
+        setCategoryId(cid ? String(cid) : "");
+        setStatus(res.data.status || "published");
+        setExistingImageUrl(
+          typeof res.data.image === "string" ? res.data.image : "",
+        );
       })
       .catch((err) => {
         setErrors({
@@ -30,37 +57,39 @@ export const EditPost = () => {
 
   const validate = () => {
     const newErrors = {};
-
     const titleError = validateMinLength(title, "Заголовок", 3);
     const contentError = validateMinLength(content, "Текст поста", 10);
-
     if (titleError) newErrors.title = titleError;
     if (contentError) newErrors.content = contentError;
-
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-
-    setErrors((currentErrors) => ({ ...currentErrors, general: "" }));
+    setErrors((prev) => ({ ...prev, general: "" }));
 
     try {
-      await api.patch(
-        `/posts/${slug}/`,
-        { title, content },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access")}`,
-          },
-        },
-      );
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("title", title);
+        fd.append("content", content);
+        fd.append("status", status);
+        if (categoryId) fd.append("category", categoryId);
+        fd.append("image", imageFile);
+        await api.patch(`/posts/${slug}/`, fd);
+      } else {
+        await api.patch(`/posts/${slug}/`, {
+          title,
+          content,
+          status,
+          category: categoryId ? Number(categoryId) : null,
+        });
+      }
       navigate(`/posts/${slug}`);
     } catch (err) {
       setErrors({
@@ -75,37 +104,76 @@ export const EditPost = () => {
   return (
     <div className="form-page">
       <h1>Редагувати пост</h1>
-      {errors.general && <p className="form-error">{errors.general}</p>}
-      <form onSubmit={handleSubmit}>
+      {errors.general ? <p className="form-error">{errors.general}</p> : null}
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <input
           type="text"
           placeholder="Заголовок"
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
-            setErrors((currentErrors) => ({
-              ...currentErrors,
-              title: "",
-              general: "",
-            }));
+            setErrors((p) => ({ ...p, title: "", general: "" }));
           }}
           aria-invalid={Boolean(errors.title)}
         />
-        {errors.title && <p className="form-error">{errors.title}</p>}
+        {errors.title ? <p className="form-error">{errors.title}</p> : null}
         <textarea
           placeholder="Текст поста"
           value={content}
           onChange={(e) => {
             setContent(e.target.value);
-            setErrors((currentErrors) => ({
-              ...currentErrors,
-              content: "",
-              general: "",
-            }));
+            setErrors((p) => ({ ...p, content: "", general: "" }));
           }}
           aria-invalid={Boolean(errors.content)}
         />
-        {errors.content && <p className="form-error">{errors.content}</p>}
+        {errors.content ? (
+          <p className="form-error">{errors.content}</p>
+        ) : null}
+        <label className="form-label" htmlFor="cat">
+          Категорія
+        </label>
+        <select
+          id="cat"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+        >
+          <option value="">Без категорії</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <label className="form-label" htmlFor="stat">
+          Статус
+        </label>
+        <select
+          id="stat"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="published">Опубліковано</option>
+          <option value="draft">Чернетка</option>
+        </select>
+        {existingImageUrl ? (
+          <p className="form-hint">
+            Поточне зображення:{" "}
+            <img
+              className="form-thumb-preview"
+              src={mediaUrl(existingImageUrl)}
+              alt=""
+            />
+          </p>
+        ) : null}
+        <label className="form-label" htmlFor="img">
+          Нове зображення (необов’язково)
+        </label>
+        <input
+          id="img"
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+        />
         <button type="submit">Зберегти</button>
       </form>
     </div>
