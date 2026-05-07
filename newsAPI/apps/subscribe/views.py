@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from datetime import timezone
+from django.utils import timezone
 from .models import Subscription, SubscriptionPlan, SubscriptionHistory, PinnedPost
 from .serializers import (SubscriptionPlanSerializer, SubscriptionSerializer,
                           SubscriptionCreateSerializer, PinnedPostSerializer,
@@ -286,7 +286,7 @@ def pinned_post_list(request):
 
     # Формуєм відповідь з інфою про пост
     posts_data = []
-    for pinned_posts in pinned_posts:
+    for pinned_post in pinned_posts:
         post = pinned_post.post
         posts_data.append({
             'id' : post.id,

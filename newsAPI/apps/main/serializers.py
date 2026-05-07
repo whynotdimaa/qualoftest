@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.utils.text import slugify
 from .models import Category, Post
+import uuid
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,7 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.posts.filter(status='published').count()
 
     def create(self, validated_data):
-        validated_data['slug'] = slugify(validated_data['name'])
+        validated_data['slug'] = slugify(validated_data['name'], allow_unicode=True) or str(uuid.uuid4())[:8]
         return super().create(validated_data)
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -86,14 +87,15 @@ class PostDetailSerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image', 'category', 'status']
+        fields = ['id', 'slug', 'title', 'content', 'image', 'category', 'status']
+        read_only_fields = ['slug', 'id']
 
     def create(self, validated_data):
-        validated_data['slug'] = slugify(validated_data['title'])
+        validated_data['slug'] = slugify(validated_data['title'], allow_unicode=True) or str(uuid.uuid4())[:8]
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         if 'title' in validated_data:
-            validated_data['title'] = slugify(validated_data['title'])
+            instance.slug = slugify(validated_data['title'], allow_unicode=True) or str(uuid.uuid4())[:8]
         return super().update(instance, validated_data)

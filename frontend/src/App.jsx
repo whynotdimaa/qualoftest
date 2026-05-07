@@ -8,6 +8,11 @@ import { Profile } from "./pages/Profile";
 import { CreatePost } from "./pages/CreatePost";
 import { MyPosts } from "./pages/MyPosts";
 import { EditPost } from "./pages/EditPost";
+import { Categories } from "./pages/Categories";
+import { CategoryPosts } from "./pages/CategoryPosts";
+import { SubscriptionPlans } from "./pages/SubscriptionPlans";
+import { Checkout } from "./pages/Checkout";
+import { PaymentSuccess, PaymentCancel } from "./pages/PaymentStatus";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { NotFound } from "./pages/NotFound";
 
@@ -27,7 +32,6 @@ export const App = () => {
             </PrivateRoute>
           }
         />
-        <Route path="/posts/:slug" element={<Post />} />
         <Route
           path="/posts/:slug/edit"
           element={
@@ -36,6 +40,27 @@ export const App = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/posts/:slug" element={<Post />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/categories/:slug" element={<CategoryPosts />} />
+        <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+        <Route
+          path="/checkout"
+          element={
+            <PrivateRoute>
+              <Checkout />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payment/success"
+          element={
+            <PrivateRoute>
+              <PaymentSuccess />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route
           path="/profile"
           element={

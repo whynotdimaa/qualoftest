@@ -4,8 +4,8 @@ from . import views
 urlpatterns = [
     #Categories
     path('categories/', views.CategoryListCreateView.as_view(), name='category-list'),
-    path('categories/<slug:slug>/', views.CategoryDetailView.as_view(), name='category-detail'),
-    path('categories/<slug:slug>/posts/', views.post_by_category, name='posts-by-category'),
+    path('categories/<str:slug>/', views.CategoryDetailView.as_view(), name='category-detail'),
+    path('categories/<str:slug>/posts/', views.post_by_category, name='posts-by-category'),
 
     #Posts
     path('', views.PostListCreateView.as_view(), name='post-list'),
@@ -14,6 +14,7 @@ urlpatterns = [
     path('featured/', views.featured_posts, name='featured-posts'),
     path('pinned/', views.pinned_posts_only, name='pinned-posts-only'),
     path('recent/', views.recent_posts, name='recent-posts'),
-    path('<slug:slug>/', views.PostDetailView.as_view(), name='post-detail'),
+    path('<str:slug>/toggle-pin/', views.toogle_post_pin_status, name='toggle-post-pin'),
+    path('<str:slug>/', views.PostDetailView.as_view(), name='post-detail'),
 
 ]

@@ -10,21 +10,30 @@ export const EditPost = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     api
       .get(`/posts/${slug}/`)
       .then((res) => {
         setTitle(res.data.title);
         setContent(res.data.content);
+        setLoading(false);
       })
       .catch((err) => {
-        setErrors({
-          general: getApiErrorMessage(
-            err.response?.data,
-            "Не вдалося завантажити пост",
-          ),
-        });
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          setErrors({
+            general: getApiErrorMessage(
+              err.response?.data,
+              "Не вдалося завантажити пост",
+            ),
+          });
+        }
+        setLoading(false);
       });
   }, [slug]);
 
@@ -52,7 +61,7 @@ export const EditPost = () => {
     setErrors((currentErrors) => ({ ...currentErrors, general: "" }));
 
     try {
-      await api.patch(
+      const response = await api.patch(
         `/posts/${slug}/`,
         { title, content },
         {
@@ -61,7 +70,8 @@ export const EditPost = () => {
           },
         },
       );
-      navigate(`/posts/${slug}`);
+      const newSlug = response.data.slug || slug;
+      navigate(`/posts/${newSlug}`);
     } catch (err) {
       setErrors({
         general: getApiErrorMessage(
@@ -71,6 +81,14 @@ export const EditPost = () => {
       });
     }
   };
+
+  if (loading) {
+    return <p>Завантаження...</p>;
+  }
+
+  if (notFound) {
+    return <p>Пост не знайдено.</p>;
+  }
 
   return (
     <div className="form-page">

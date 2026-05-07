@@ -1,0 +1,128 @@
+.subscription-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 25px;
+  color: white;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.subscription-info h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.4rem;
+  color: white;
+}
+
+.subscription-active .subscription-details {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item .label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-item .value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+.status-active {
+  color: #4ade80 !important;
+}
+
+.status-inactive {
+  color: #f87171 !important;
+}
+
+.subscription-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-upgrade,
+.btn-cancel,
+.btn-subscribe {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.btn-upgrade {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.btn-upgrade:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-cancel {
+  background-color: rgba(255, 59, 48, 0.2);
+  color: #ff6b6b;
+  border: 2px solid rgba(255, 59, 48, 0.4);
+}
+
+.btn-cancel:hover {
+  background-color: rgba(255, 59, 48, 0.3);
+  border-color: rgba(255, 59, 48, 0.6);
+}
+
+.subscription-inactive {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.subscription-inactive p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 20px;
+}
+
+.btn-subscribe {
+  background-color: #4ade80;
+  color: #1f2937;
+  padding: 12px 30px;
+  margin: 0 auto;
+  display: inline-block;
+}
+
+.btn-subscribe:hover {
+  background-color: #22c55e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+.error-message {
+  color: #fca5a5;
+  padding: 10px;
+  background: rgba(255, 59, 48, 0.2);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-top: 15px;
+}

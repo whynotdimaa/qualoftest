@@ -16,6 +16,21 @@
   margin-bottom: 24px;
 }
 
+.pinned-badge {
+  color: #ffc107;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.post-error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
 .post-page .post-content {
   font-size: 16px;
   line-height: 1.8;
@@ -27,14 +42,23 @@
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.post-actions a,
+.post-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .post-actions a {
   background: #0066cc;
   color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+  text-decoration: none;
 }
 
 .post-actions a:hover {
@@ -44,13 +68,30 @@
 
 .post-actions button {
   background: #e74c3c;
-  padding: 8px 16px;
-  font-size: 14px;
-  border-radius: 6px;
+  color: white;
 }
 
 .post-actions button:hover {
   background: #c0392b;
+}
+
+.pin-button {
+  background: #ffc107;
+  color: #333;
+}
+
+.pin-button:hover {
+  background: #e0a800;
+  transform: scale(1.05);
+}
+
+.pin-button.pinned {
+  background: #28a745;
+  color: white;
+}
+
+.pin-button.pinned:hover {
+  background: #218838;
 }
 
 .comments-section h2 {

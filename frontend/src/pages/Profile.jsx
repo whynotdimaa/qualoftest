@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+import { SubscriptionInfo } from "../components/SubscriptionInfo";
 import "./Profile.css";
 
 export const Profile = () => {
@@ -22,6 +23,8 @@ export const Profile = () => {
 
   return (
     <div className="profile-page">
+      <SubscriptionInfo userId={profile.id} />
+      
       <div className="profile-card">
         <div className="profile-avatar">
           {profile.username[0].toUpperCase()}

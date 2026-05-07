@@ -16,6 +16,6 @@ urlpatterns = [
     path('pinned-post/', views.PinnedPostView.as_view(), name = 'pinned-post'),
     path('pin-post/', views.pin_post, name = 'pin-post'),
     path('unpin-post/', views.unpin_post, name = 'unpin-post'),
-    path('pinned-post/', views.pinned_post_list, name = 'pinned_posts-lіst'),
+    path('pinned-posts/', views.pinned_post_list, name = 'pinned-posts-list'),
     path('pinned-post/<int:pk>/', views.can_pin_post, name = 'can-pin-post'),
 ]

@@ -11,17 +11,32 @@ export const Post = () => {
   const [text, setText] = useState("");
   const [commentError, setCommentError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+  const [pinError, setPinError] = useState("");
   const isAuth = !!localStorage.getItem("access");
   const navigate = useNavigate();
   const token = localStorage.getItem("access");
 
   useEffect(() => {
-    api.get(`/posts/${slug}/`).then((res) => {
-      setPost(res.data);
-      api
-        .get(`/comments/?post=${res.data.id}`)
-        .then((r) => setComments(r.data.results || r.data));
-    });
+    api
+      .get(`/posts/${slug}/`)
+      .then((res) => {
+        setPost(res.data);
+        setIsPinned(res.data.is_pinned);
+        setLoading(false);
+        api
+          .get(`/comments/?post=${res.data.id}`)
+          .then((r) => setComments(r.data.results || r.data));
+      })
+      .catch((err) => {
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        }
+        setLoading(false);
+        setPost(null);
+      });
 
     if (token) {
       api
@@ -38,6 +53,38 @@ export const Post = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     navigate("/");
+  };
+
+  const handlePinPost = async () => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      if (isPinned) {
+        await api.post(
+          "/subscribe/unpin-post/",
+          { post_id: post.id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setIsPinned(false);
+      } else {
+        await api.post(
+          "/subscribe/pin-post/",
+          { post_id: post.id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setIsPinned(true);
+      }
+      setPinError("");
+    } catch (err) {
+      const errorMsg = getApiErrorMessage(
+        err.response?.data,
+        isPinned ? "Не вдалося розкріпити пост" : "Не вдалося закріпити пост"
+      );
+      setPinError(errorMsg);
+    }
   };
 
   const handleComment = async (e) => {
@@ -68,7 +115,8 @@ export const Post = () => {
     }
   };
 
-  if (!post) return <p>Завантаження...</p>;
+  if (loading) return <p>Завантаження...</p>;
+  if (notFound) return <p>Пост не знайдено.</p>;
 
   const isAuthor = currentUser?.id === post.author_info?.id;
 
@@ -77,15 +125,28 @@ export const Post = () => {
       <h1>{post.title}</h1>
       <div className="post-meta">
         Автор: {post.author_info?.username} · Переглядів: {post.views_count}
+        {isPinned && <span className="pinned-badge"> 📌 Закріплено</span>}
       </div>
       <p className="post-content">{post.content}</p>
 
-      {isAuthor && (
-        <div className="post-actions">
-          <Link to={`/posts/${slug}/edit`}>Редагувати</Link>
-          <button onClick={handleDelete}>Видалити</button>
-        </div>
-      )}
+      {pinError && <p className="post-error">{pinError}</p>}
+
+      <div className="post-actions">
+        {isAuthor && (
+          <>
+            <Link to={`/posts/${slug}/edit`}>Редагувати</Link>
+            <button onClick={handleDelete}>Видалити</button>
+          </>
+        )}
+        {isAuth && post.can_pin && (
+          <button 
+            className={`pin-button ${isPinned ? "pinned" : ""}`}
+            onClick={handlePinPost}
+          >
+            {isPinned ? "📌 Розкріпити" : "📌 Закріпити"}
+          </button>
+        )}
+      </div>
 
       <div className="comments-section">
         <h2>Коментарі</h2>

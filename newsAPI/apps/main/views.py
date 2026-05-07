@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from datetime import timedelta
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from .models import Category, Post
@@ -186,7 +188,7 @@ def post_by_category(request, category_slug):
     return Response({
         'category' : CategorySerializer(category).data,
         'posts' : serializer.data,
-        'pinned_posts_count' : sum(1 for post in selializer.data if post.get('is pinned', False)),
+        'pinned_posts_count' : sum(1 for post in serializer.data if post.get('is_pinned', False)),
     })
 
 
@@ -197,7 +199,7 @@ def post_by_category(request, category_slug):
 )
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
-def popular_posts(request, category_slug):
+def popular_posts(request):
     '''10 самих популярних постів '''
     posts = Post.objects.with_subscription_info().filter(
         status = 'published'
@@ -214,7 +216,7 @@ def popular_posts(request, category_slug):
 )
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
-def recent_posts(request, category_slug):
+def recent_posts(request):
     posts = Post.objects.with_subscription_info().filter(
         status = 'published'
     ).order_by('-created_at')[:10]

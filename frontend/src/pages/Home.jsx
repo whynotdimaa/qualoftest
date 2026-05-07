@@ -18,13 +18,8 @@ export const Home = () => {
   const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
-    const params = {
-      page: currentPage,
-    };
-
-    if (searchQuery.trim()) {
-      params.search = searchQuery.trim();
-    }
+    const params = { page: currentPage };
+    if (searchQuery.trim()) params.search = searchQuery.trim();
 
     api.get("/posts/", { params }).then((res) => {
       const responseData = res.data;
@@ -52,11 +47,7 @@ export const Home = () => {
   const goToPage = (page) => {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("page", String(page));
-
-    if (searchQuery.trim()) {
-      nextParams.set("search", searchQuery.trim());
-    }
-
+    if (searchQuery.trim()) nextParams.set("search", searchQuery.trim());
     setSearchParams(nextParams);
   };
 
@@ -72,43 +63,38 @@ export const Home = () => {
         />
         <button type="submit">Шукати</button>
       </form>
+
       {searchQuery && (
         <div className="home-search-meta">
           Результати для: <strong>{searchQuery}</strong>
         </div>
       )}
+
       {posts.length === 0 ? (
         <p className="home-empty">Пости не знайдено.</p>
       ) : null}
+
       {posts.map((post) => (
         <div key={post.id} className="post-card">
           <Link to={`/posts/${post.slug}`} className="card-link">
             <h2>{post.title}</h2>
             <p>{post.content}</p>
             <div className="post-meta">
-              Автор: {post.author} ·{" "}
-              {new Date(post.created_at).toLocaleDateString("uk-UA")}
+              Автор: {post.author} · {new Date(post.created_at).toLocaleDateString("uk-UA")}
             </div>
           </Link>
         </div>
       ))}
+
       {totalPages > 1 && (
         <div className="home-pagination">
-          <button
-            type="button"
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage <= 1}
-          >
+          <button type="button" onClick={() => goToPage(currentPage - 1)} disabled={currentPage <= 1}>
             Попередня
           </button>
           <span>
             Сторінка {currentPage} з {totalPages}
           </span>
-          <button
-            type="button"
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-          >
+          <button type="button" onClick={() => goToPage(currentPage + 1)} disabled={currentPage >= totalPages}>
             Наступна
           </button>
         </div>

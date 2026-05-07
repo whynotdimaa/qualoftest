@@ -2,6 +2,19 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.urls import reverse
+import uuid
+
+
+def generate_unique_slug(model, value, slug_field_name='slug'):
+    base_slug = slugify(value, allow_unicode=True) or str(uuid.uuid4())[:8]
+    slug = base_slug
+    counter = 1
+    lookup = {slug_field_name: slug}
+    while model.objects.filter(**lookup).exists():
+        slug = f"{base_slug}-{counter}"
+        lookup[slug_field_name] = slug
+        counter += 1
+    return slug
 
 
 class Category(models.Model):
@@ -20,7 +33,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(Category, self.name)
         super().save(*args, **kwargs)
 
 class PostManager(models.Manager):
@@ -74,8 +87,18 @@ class Post(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
+        # Regenerate slug if title changed or slug is empty
+        if not self.pk or not self.slug:
+            # New post or missing slug
+            self.slug = generate_unique_slug(Post, self.title)
+        else:
+            # Existing post - check if title changed
+            try:
+                old_post = Post.objects.get(pk=self.pk)
+                if old_post.title != self.title:
+                    self.slug = generate_unique_slug(Post, self.title)
+            except Post.DoesNotExist:
+                self.slug = generate_unique_slug(Post, self.title)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
